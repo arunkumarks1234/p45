@@ -1,0 +1,54 @@
+# Schema Diagrams for OTT Platforms Data Warehouse
+
+## Dimensions
+- TimeDim: time_key, date, month, quarter, year
+- UserDim: user_key, user_name, age, gender, location_key
+- MovieDim: movie_key, movie_title, genre, director, release_year
+- PlatformDim: platform_key, platform_name (e.g., Netflix, Amazon Prime)
+- LoginMethodDim: login_key, login_method (e.g., Email, Social, Device)
+
+## Fact Tables
+- WatchFact: watch_key, time_key, user_key, movie_key, platform_key, views, time_spent_minutes
+- LoginFact: login_key, time_key, user_key, platform_key, login_method_key, login_count
+
+## Star Schema Diagram
+```
+          WatchFact
+         / | | | \
+        /  | | |  \
+TimeDim  UserDim  MovieDim  PlatformDim  LoginMethodDim
+```
+
+- All dimensions directly connected to fact tables.
+- WatchFact connected to TimeDim, UserDim, MovieDim, PlatformDim.
+- LoginFact connected to TimeDim, UserDim, PlatformDim, LoginMethodDim.
+
+## Snowflake Schema Diagram
+```
+          WatchFact
+         / | | | \
+        /  | | |  \
+TimeDim  UserDim  MovieDim  PlatformDim  LoginMethodDim
+                              |
+                            CityDim
+                              |
+                            StateDim
+```
+
+- UserDim normalized into CityDim and StateDim (via location_key).
+- MovieDim could be normalized, but kept simple for this example.
+- LoginFact similar connections.
+
+## Fact Constellation Schema Diagram
+```
+TimeDim ---- WatchFact ---- MovieDim
+ |             |
+ |             |
+UserDim ---- LoginFact ---- PlatformDim
+ |             |
+LoginMethodDim --/
+```
+
+- Multiple fact tables (WatchFact and LoginFact) sharing common dimensions (TimeDim, UserDim, PlatformDim).
+- WatchFact also connected to MovieDim.
+- LoginFact connected to LoginMethodDim.
